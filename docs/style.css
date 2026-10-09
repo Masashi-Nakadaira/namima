@@ -7,3 +7,5 @@
 body:has(#home:not([hidden])) main{min-height:calc(100svh - 88px);display:grid;place-items:center;padding:24px}.home{width:min(100%,480px);max-width:480px;margin:0;padding:0}.home .difficulties{display:grid;grid-template-columns:1fr;gap:16px}.home .difficulties button{display:block;min-height:80px;width:100%;padding:22px;text-align:center;font-size:22px;font-weight:500;letter-spacing:.08em}
 
 body:has(#home:not([hidden])) .topbar{justify-content:flex-end}body:has(#home:not([hidden])) .brand{display:none}
+
+.home .home-title{text-align:center;font:500 30px ui-monospace,monospace;letter-spacing:.18em;margin:0 0 30px;color:var(--text)}.home .difficulties button strong{display:block;font-size:22px;font-weight:500}.home .difficulties button small{display:block;margin-top:10px;font-size:12px;letter-spacing:.04em;color:var(--muted)}
