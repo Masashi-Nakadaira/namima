@@ -4,4 +4,6 @@
 
 
 /* Minimal difficulty picker, including narrow touch screens. */
-body:has(#home:not([hidden])) main{min-height:100svh;display:grid;place-items:center;padding:24px}.home{width:min(100%,480px);max-width:480px;margin:0;padding:0}.home .difficulties{display:grid;grid-template-columns:1fr;gap:16px}.home .difficulties button{display:block;min-height:80px;width:100%;padding:22px;text-align:center;font-size:22px;font-weight:500;letter-spacing:.08em}
+body:has(#home:not([hidden])) main{min-height:calc(100svh - 88px);display:grid;place-items:center;padding:24px}.home{width:min(100%,480px);max-width:480px;margin:0;padding:0}.home .difficulties{display:grid;grid-template-columns:1fr;gap:16px}.home .difficulties button{display:block;min-height:80px;width:100%;padding:22px;text-align:center;font-size:22px;font-weight:500;letter-spacing:.08em}
+
+body:has(#home:not([hidden])) .topbar{justify-content:flex-end}body:has(#home:not([hidden])) .brand{display:none}

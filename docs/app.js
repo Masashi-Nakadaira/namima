@@ -9,7 +9,7 @@ class WaveView{
 const targetView=new WaveView('target'),currentView=new WaveView('current');
 function round(){return game.rounds[game.index]}
 function displayValue(c,v){return c.key.endsWith('.p')?`${Math.round(v)}°`:v.toFixed(c.key==='lambda'?3:2)}
-function screen(id){$('.topbar').hidden=id==='home';for(const x of ['home','play','results'])$('#'+x).hidden=x!==id;window.scrollTo?.(0,0)}
+function screen(id){for(const x of ['home','play','results'])$('#'+x).hidden=x!==id;window.scrollTo?.(0,0)}
 function start(mode,seed){game=S.create(mode,seed??(Date.now()>>>0));screen('play');loadRound()}
 function loadRound(){state=clone(round().level.initial);judged=false;hintStage=0;history=[];gesture=null;lastResult=null;clearAnswer();$('#roundMeta').textContent=`${S.modes[game.mode].name} / ${game.index+1} OF 5 / ${round().color.name}`;$('#roundTitle').textContent=round().level.title;$('#primary').textContent='判定する';$('#primary').disabled=false;$('#profilesDetail').open=false;renderControls();resize();render();$('#roundTitle').focus({preventScroll:true});}
 function clearAnswer(){$('#judgment').hidden=true;$('#judgment').replaceChildren();$('#hintText').hidden=true;$('#hintText').textContent='';$('#targetSources').replaceChildren();$$('.answer-marker').forEach(e=>e.remove());$('#hint').hidden=false;}
