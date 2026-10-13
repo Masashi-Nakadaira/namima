@@ -26,3 +26,4 @@ function evaluate(current,target){let sum=0,max=0;for(const [x,y] of samples){co
 function remix(level,seed){const target=JSON.parse(JSON.stringify(level.target));let n=seed>>>0;for(const c of level.controls){n=(Math.imul(n,1664525)+1013904223)>>>0;const steps=Math.round((c.max-c.min)/c.step);put(target,c.key,+(c.min+(n%(steps+1))*c.step).toFixed(4))}if(evaluate(level.initial,target).won){const c=level.controls[0];put(target,c.key,get(target,c.key)>(c.min+c.max)/2?c.min:c.max)}return {...level,target}}
 root.WaveModel={intensity,levels,evaluate,get,put,remix,samples};if(typeof module!=='undefined')module.exports=root.WaveModel;
 })(typeof window!=='undefined'?window:globalThis);
+

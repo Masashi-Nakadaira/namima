@@ -1174,7 +1174,8 @@ function levelTitle(id){return messages[locale].levelTitles[id]}
 function levelHint(id){return messages[locale].levelHints[id]}
 function controlLabel(key){return messages[locale].controls[key]}
 function colorName(color){const index=root.NamimaSession.colors.indexOf(color);return messages[locale].colors[index]}
-function summary(game,url){return [t('shareHeading'),t('shareScore',{mode:t(game.mode),score:root.NamimaSession.total(game).toFixed(1)}),t('shareDetail',{count:game.rounds.filter(r=>r.hints>0).length}),...(url?[url]:[])].join('\n')}
+function summary(game,url){if(!root.NamimaSession.complete(game))throw Error('Finish five rounds first');return [t('shareHeading'),t('shareScore',{mode:t(game.mode),score:root.NamimaSession.total(game).toFixed(1)}),t('shareDetail',{count:game.rounds.filter(r=>r.scoredHints>0).length}),...(game.replay?[t('replayResult')]:[]),...(url?[url]:[])].join('\n')}
 const api={messages,localeOrder,storageKey,matchLocale,detect,readPreference,writePreference,format,t,setPreference,refreshAuto,levelTitle,levelHint,controlLabel,colorName,summary,get locale(){return locale},get preference(){return preference}};
 root.NamimaI18n=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
+

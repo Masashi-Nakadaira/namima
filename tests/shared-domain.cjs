@@ -1,0 +1,31 @@
+const test=require('node:test'),a=require('node:assert/strict');
+const M=require('../docs/model.js'),S=require('../docs/session.js'),C=require('../docs/challenge.js');
+const snapshot=g=>g.rounds.map(r=>({level:r.level,color:r.color}));
+test('3000 seeds across three difficulties: deterministic five reachable nontrivial questions',()=>{
+ for(const mode of Object.keys(S.modes))for(let seed=0;seed<1000;seed++){
+  const g=S.create(mode,seed),p=C.parseCode(C.code(mode,seed));a.equal(g.rounds.length,5);a.deepEqual(snapshot(g),snapshot(S.create(p.mode,p.seed)));a.equal(new Set(g.rounds.map(r=>r.color.name)).size,5);
+  for(const r of g.rounds){a.equal(M.evaluate(r.level.target,r.level.target).score,100);a(!M.evaluate(r.level.initial,r.level.target).won);a(S.modes[mode].pool.includes(r.level.id));for(const c of r.level.controls){const v=M.get(r.level.target,c.key);a(v>=c.min&&v<=c.max);a(Math.abs((v-c.min)/c.step-Math.round((v-c.min)/c.step))<1e-7)}}
+ }
+});
+test('boundary seeds and three difficulties roundtrip; unrelated query data removed',()=>{
+ for(const mode of Object.keys(S.modes))for(const seed of [0,1,20261011,0xffffffff]){const u=C.url('https://example.test/sub/index.html?private=x#old',mode,seed),p=C.fromURL(u);a.equal(p.version,1);a.equal(p.mode,mode);a.equal(p.seed,seed);a.equal(p.shared,null);a(!u.includes('private'));a(u.includes('/sub/index.html#'));a.deepEqual(snapshot(S.create(mode,seed)),snapshot(S.create(p.mode,p.seed)))}
+});
+test('NM1 golden fixture freezes reference questions and scoring version',()=>{const g=S.create('normal',20261011);a.equal(C.code(g.mode,g.seed),'NM1-N-01352893');a.deepEqual(g.rounds.map(r=>[r.level.id,r.level.target.lambda,r.level.target.src.map(x=>[x.x,x.y,x.p,x.a])]),require('./nm1-fixture.json'));a.deepEqual(g.rounds.map(r=>M.evaluate(r.level.initial,r.level.target).score),[58.2,71.3,32.6,63.1,65.4])});
+test('invalid difficulties including prototype keys and invalid unsigned seeds rejected',()=>{for(const mode of ['toString','__proto__','constructor','extreme',null])a.throws(()=>S.create(mode,1));for(const seed of [-1,1.5,NaN,Infinity,4294967296,'15',null]){a.throws(()=>S.create('easy',seed));a.throws(()=>C.code('easy',seed))}});
+test('strict supported version and width; whitespace/case accepted',()=>{for(const x of ['',null,'NM2-N-00000001','NM1-X-00000001','NM1-N-1','NM1-N-FFFFFFFFF','NM1-N-00000001 trailing','<script>'])a.throws(()=>C.parseCode(x));a.equal(C.parseCode(' nm1-e-00000000 ').seed,0)});
+test('malformed shared results rejected wholly, never treated as a zero or ranking',()=>{
+ const base='https://example.test/#challenge=NM1-E-00000000';
+ for(const suffix of ['&scores=1000.1000.1000.1000.1001&hints=0&replay=0','&scores=1.2.3.4&hints=0&replay=0','&scores=-1.2.3.4.5&hints=0&replay=0','&scores=01.2.3.4.5&hints=0&replay=0','&scores=NaN.2.3.4.5&hints=0&replay=0','&scores=1.2.3.4.5&hints=6&replay=0','&scores=1.2.3.4.5&hints=0&replay=yes','&scores=1.2.3.4.5','&hints=0','&replay=1','&challenge=NM1-H-00000000','&scores=1.2.3.4.5&scores=1.2.3.4.5&hints=0&replay=0','&scores=1.2.3.4.5&hints=0&hints=1&replay=0','&x='+ 'a'.repeat(520)])a.throws(()=>C.fromURL(base+suffix),suffix);
+ a.throws(()=>C.fromURL('https://example.test/#scores=1.2.3.4.5'));a.throws(()=>C.fromURL('not a URL'));a.equal(C.fromURL('https://example.test/#about'),null);
+});
+test('first judgment and hint use lock together; post-judge practice cannot overwrite either',()=>{const g=S.create('easy',0);a.throws(()=>C.result(g));for(const r of g.rounds){r.hints=0;S.record(r,68.3);r.hints=3;S.record(r,100)}a.equal(S.total(g),341.5);a.deepEqual(C.result(g),{scores:[683,683,683,683,683],hints:0,replay:false});a.equal(C.total(C.result(g)),341.5);for(const x of [NaN,Infinity,undefined,'5'])a.throws(()=>S.record({score:null,hints:0},x));a.equal(S.record({score:null,hints:0},130),100);a.equal(S.record({score:null,hints:0},-1),0)});
+test('shared result roundtrip preserves every score, difficulty, seed, hints and replay flag',()=>{const g=S.create('hard',0xffffffff);g.replay=true;g.rounds.forEach((r,i)=>{r.hints=i%2;S.record(r,i*20.1)});const r=C.result(g),p=C.fromURL(C.url('https://example.test/','hard',g.seed,r));a.equal(p.mode,'hard');a.equal(p.seed,g.seed);a.deepEqual(p.shared,r);a.equal(C.total(p.shared),201);a.equal(p.shared.hints,2);a(p.shared.replay)});
+test('zero result differs from absent result',()=>{const zero={scores:[0,0,0,0,0],hints:0,replay:false};a.equal(C.total(C.fromURL(C.url('https://example.test/','easy',0,zero)).shared),0);a.equal(C.fromURL(C.url('https://example.test/','easy',0)).shared,null)});
+test('file, loopback, LAN and local-domain URLs omitted; unsafe schemes/credentials rejected',()=>{
+ for(const base of ['file:///tmp/index.html','http://localhost:4173/','http://foo.localhost/','http://127.1.2.3/','http://[::1]/','http://10.2.3.4/','http://172.16.0.1/','http://172.31.255.1/','http://192.168.0.1/','http://device.local/','http://device.local./','http://home.arpa/','http://router.home.arpa/','http://dashboard.internal/','http://[fec0::1]/','http://intranet/','http://169.254.1.1/','http://100.64.0.1/','http://[fd00::1]/','http://[fe80::1]/','http://[::ffff:192.168.0.1]/'])a.equal(C.shareableURL(base,'easy',0),'',base);
+ for(const base of ['javascript:alert(1)','data:text/html,x','https://user:password@example.test/'])a.throws(()=>C.url(base,'easy',0));a(C.shareableURL('https://example.test/','easy',0).startsWith('https://example.test/#challenge='));
+});
+test('session level mutations cannot change the model or another session',()=>{const one=S.create('hard',1),two=S.create('hard',1);one.rounds[0].level.initial.lambda=99;one.rounds[0].level.controls[0].max=99;one.rounds[0].level.target.lambda=99;a.deepEqual(snapshot(S.create('hard',1)),snapshot(two))});
+test('legacy summary locks hints and explicitly marks replay',()=>{const g=S.create('easy',0);a.throws(()=>S.summary(g));g.rounds.forEach(r=>{r.hints=0;S.record(r,50);r.hints=3});g.replay=true;const out=S.summary(g);a(out.includes('ヒント利用 0問'));a(out.includes('復習モード'));a(out.includes('250.0'))});
+
+test('sparse score arrays cannot serialize an invalid comparison result',()=>{const r={scores:Array(5),hints:0,replay:false};a.equal(C.validResult(r),false);a.throws(()=>C.hash('easy',0,r))});
