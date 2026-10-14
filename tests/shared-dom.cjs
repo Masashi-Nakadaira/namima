@@ -57,3 +57,13 @@ test('post-judgment reset explains retained score before practice across rounds 
  }
  w.close();
 });
+
+test('Japanese easy-round headline asks for pattern matching, not color matching',()=>{
+ const w=boot('https://example.test/#challenge=NM1-E-00000000',['ja']);
+ for(let i=0;i<5;i++){
+  if(i===0||i===3)a.equal(el(w,'roundTitle').textContent,'波の模様を合わせる');
+  a(!el(w,'roundTitle').textContent.includes('色を合わせる'));
+  click(w,'primary');click(w,'primary');
+ }
+ a(el(w,'roundScores').textContent.includes('波の模様を合わせる'));w.close();
+});
