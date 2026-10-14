@@ -82,3 +82,15 @@ test('entry cue never returns on later rounds or practice replay',()=>{
  click(w,'primary');click(w,'primary');a(!cue());finish(w);click(w,'replay');a(!cue());w.close();
  const replay=boot('https://example.test/#challenge=NM1-E-00000000',['en'],null,{namimaCode:'NM1-E-00000000',namimaReplay:true});a(!el(replay,'play').classList.contains('entry-cue'));replay.close();
 });
+
+
+test('result sharing follows the score summary before round detail and keeps feedback nearby',()=>{
+ const w=boot();w.eval("start('easy',0)");finish(w);
+ const result=el(w,'results'),ids=[...result.children].map(x=>x.id);
+ a(ids.indexOf('resultNote')<ids.indexOf('share'));
+ a(ids.indexOf('share')<ids.indexOf('copyInvitation'));
+ a(ids.indexOf('copyInvitation')<ids.indexOf('copyFallback'));
+ a(ids.indexOf('copyFallback')<ids.indexOf('shareStatus'));
+ a(ids.indexOf('shareStatus')<ids.indexOf('roundScores'));
+ a(!el(w,'share').disabled);a(!el(w,'copyInvitation').disabled);w.close();
+});
