@@ -364,4 +364,17 @@
     messages[locale].firstRoundGuide = guide;
     messages[locale].sharedEntry = context;
   }
+  const practiceCopy = {
+  "ja": "練習",
+  "en": "Practice",
+  "ko": "연습",
+  "zh-Hans": "练习",
+  "zh-Hant": "練習",
+  "fr": "Entraînement",
+  "de": "Übung",
+  "id": "Latihan",
+  "th": "ฝึกซ้อม",
+  "vi": "Luyện tập"
+};
+  for (const [locale, text] of Object.entries(practiceCopy)) messages[locale].practiceGuide = text;
 })(typeof window !== 'undefined' ? window : globalThis);

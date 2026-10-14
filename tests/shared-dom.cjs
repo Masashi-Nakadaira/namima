@@ -42,3 +42,18 @@ test('orientation never invents a sender result for score-free links, fresh game
  setHash(w,'#challenge=NM1-E-00000000&scores=0.0.0.0.0&hints=0&replay=0');a(el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));
  setHash(w,'#challenge=NM1-H-00000003');a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));w.close();
 });
+
+test('post-judgment reset explains retained score before practice across rounds and locales',()=>{
+ const w=boot('https://example.test/#challenge=NM1-N-00000001&scores=100.200.300.400.500&hints=1&replay=0');
+ for(let n=0;n<2;n++){
+  click(w,'reset');a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('practiceGuide')));
+  click(w,'primary');const first=w.eval('round().score');click(w,'reset');
+  for(const locale of w.NamimaI18n.localeOrder){
+   language(w,locale);a.equal(w.document.querySelector('.entry-guide').textContent,w.NamimaI18n.t('practiceGuide'));
+   a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('firstRoundGuide',{yours:w.NamimaI18n.t('yours'),target:w.NamimaI18n.t('target'),judge:w.NamimaI18n.t('judge')})));
+   a(el(w,'judgment').hidden);a.equal(w.eval('round().score'),first);
+  }
+  solve(w);click(w,'primary');a.equal(w.eval('round().score'),first);a.equal(w.document.querySelector('.entry-guide'),null);click(w,'primary');
+ }
+ w.close();
+});

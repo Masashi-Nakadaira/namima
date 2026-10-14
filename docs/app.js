@@ -40,7 +40,7 @@ function renderRoundText(){if(!game)return;$('#roundMeta').textContent=t('roundM
 function renderChallengeContext(){
  const meta=$('#challengeMeta');meta.replaceChildren();
  // Keep the explanation at the point of action, without a new screen or score preview.
- if(game.index===0&&!judged&&!game.replay){const guide=document.createElement('span');guide.className='entry-guide';guide.textContent=t('firstRoundGuide',{yours:t('yours'),target:t('target'),judge:t('judge')});meta.append(guide)}
+ if(!judged&&(round().score!==null||(game.index===0&&!game.replay))){const guide=document.createElement('span');guide.className='entry-guide';guide.textContent=round().score!==null?t('practiceGuide'):t('firstRoundGuide',{yours:t('yours'),target:t('target'),judge:t('judge')});meta.append(guide)}
  meta.append(document.createTextNode((sharedResult?t('sharedEntry')+' · ':'')+t('challengeLine',{code:C.code(game.mode,game.seed)})+(game.replay?' · '+t('replayNotice'):'')));
 }
 function renderJudgment(){if(!judged)return;$('#judgment').innerHTML=`<p class="eyebrow">${escapeHTML(t(judgmentPractice?'practiceJudgment':'judgment'))}</p><strong>${escapeHTML(t('match',{score:lastResult.toFixed(1)}))}</strong>`}
