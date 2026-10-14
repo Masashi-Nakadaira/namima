@@ -67,3 +67,18 @@ test('Japanese easy-round headline asks for pattern matching, not color matching
  }
  a(el(w,'roundScores').textContent.includes('波の模様を合わせる'));w.close();
 });
+test('first-entry visual cue yields to any adjustment without requiring it',()=>{
+ for(const kind of ['slider','step','judge']){
+  const w=boot('https://example.test/#challenge=NM1-E-00000000'),cue=()=>el(w,'play').classList.contains('entry-cue');
+  a(cue());a(!el(w,'primary').disabled);language(w,'ja');a(cue());click(w,'reset');a(cue());
+  if(kind==='slider')change(w,1,.8);
+  if(kind==='step')w.document.querySelector('[data-step="1,1"]').click();
+  if(kind==='judge')click(w,'primary');
+  a(!cue());click(w,'reset');a(!cue());w.eval("start('easy',3)");a(!cue());w.close();
+ }
+});
+test('entry cue never returns on later rounds or practice replay',()=>{
+ const w=boot('https://example.test/#challenge=NM1-E-00000000'),cue=()=>el(w,'play').classList.contains('entry-cue');
+ click(w,'primary');click(w,'primary');a(!cue());finish(w);click(w,'replay');a(!cue());w.close();
+ const replay=boot('https://example.test/#challenge=NM1-E-00000000',['en'],null,{namimaCode:'NM1-E-00000000',namimaReplay:true});a(!el(replay,'play').classList.contains('entry-cue'));replay.close();
+});

@@ -20,3 +20,9 @@ body:has(#home:not([hidden])) .topbar{justify-content:flex-end}body:has(#home:no
 
 /* First-round orientation reuses the existing challenge line; no extra panel. */
 .entry-guide{display:block;font:12px/1.8 system-ui,sans-serif;color:var(--text);margin-bottom:4px}
+
+/* One quiet cue on the first entry; no motion, layout shift, or disabled action. */
+.entry-cue #controls .control:first-child .range-track{border-radius:20px;box-shadow:0 0 0 1px #b5ecda88,0 0 14px #b5ecda22}
+.entry-cue #controls .control:first-child input::-webkit-slider-thumb{box-shadow:0 0 0 2px #b5ecda,0 0 0 6px #b5ecda22}
+.entry-cue #controls .control:first-child input::-moz-range-thumb{box-shadow:0 0 0 2px #b5ecda,0 0 0 6px #b5ecda22}
+.entry-cue #primary{background:transparent;color:var(--mint);border:1px solid #7ea79e}
