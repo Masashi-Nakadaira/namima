@@ -318,4 +318,50 @@
   for (const [locale, row] of Object.entries(rows)) {
     keys.forEach((key, index) => { messages[locale][key] = row[index]; });
   }
+  const entryCopy = {
+    "ja": [
+        "つまみで「{yours}」を「{target}」に近づけ、「{judge}」。",
+        "送り手と同じ5問 · 5問後に結果を比較"
+    ],
+    "en": [
+        "Match “{yours}” to “{target}” with the sliders, then choose “{judge}”.",
+        "Same five as the sender · Compare results after round 5"
+    ],
+    "ko": [
+        "슬라이더를 움직여 “{yours}”를 “{target}”에 맞춘 다음 “{judge}”를 누르세요.",
+        "보낸 사람과 같은 다섯 문제 · 5문제 후 결과 비교"
+    ],
+    "zh-Hans": [
+        "移动滑块，让“{yours}”接近“{target}”，准备好后点击“{judge}”。",
+        "与分享者相同的五道题 · 完成后比较结果"
+    ],
+    "zh-Hant": [
+        "移動滑桿，讓「{yours}」接近「{target}」，準備好後點選「{judge}」。",
+        "與分享者相同的五道題 · 完成後比較結果"
+    ],
+    "fr": [
+        "Déplacez les curseurs pour rapprocher « {yours} » de « {target} », puis choisissez « {judge} ».",
+        "Les cinq mêmes que l’expéditeur · Comparaison après la 5e manche"
+    ],
+    "de": [
+        "Bewege die Regler, um „{yours}“ an „{target}“ anzupassen. Wähle dann „{judge}“.",
+        "Dieselben fünf wie die sendende Person · Vergleich nach Runde 5"
+    ],
+    "id": [
+        "Geser pengatur agar “{yours}” cocok dengan “{target}”, lalu pilih “{judge}”.",
+        "Lima soal yang sama dengan pengirim · Bandingkan hasil setelah ronde 5"
+    ],
+    "th": [
+        "เลื่อนแถบปรับให้ “{yours}” ตรงกับ “{target}” แล้วเลือก “{judge}”",
+        "โจทย์ห้าข้อเดียวกับผู้ส่ง · เปรียบเทียบผลหลังข้อที่ 5"
+    ],
+    "vi": [
+        "Kéo thanh trượt để “{yours}” giống “{target}”, rồi chọn “{judge}”.",
+        "Cùng năm câu hỏi với người gửi · So sánh kết quả sau vòng 5"
+    ]
+};
+  for (const [locale, [guide, context]] of Object.entries(entryCopy)) {
+    messages[locale].firstRoundGuide = guide;
+    messages[locale].sharedEntry = context;
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

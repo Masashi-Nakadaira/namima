@@ -19,3 +19,26 @@ test('repeated share clicks and interrupted clipboard promise cannot show stale 
 test('replay history state survives page reconstruction but is not inherited by a new recipient',()=>{const one=boot('https://example.test/#challenge=NM1-E-00000001');finish(one);click(one,'replay');const href=one.location.href,state=JSON.parse(JSON.stringify(one.history.state));a.equal(state.namimaReplay,true);const reloaded=boot(href,['en'],null,state),recipient=boot(href);a(reloaded.eval('game.replay'));a.equal(recipient.eval('game.replay'),false);const mismatched=boot('https://example.test/#challenge=NM1-E-00000002',['en'],null,state);a.equal(mismatched.eval('game.replay'),false);one.close();reloaded.close();recipient.close();mismatched.close()});
 test('invalid URL then empty navigation closes the error dialog and removes validation',()=>{const w=boot('https://example.test/#challenge=bad');a(el(w,'aboutDialog').open);setHash(w,'');a(!el(w,'aboutDialog').open);a.equal(el(w,'joinError').textContent,'');a.equal(el(w,'challengeInput').hasAttribute('aria-invalid'),false);a(!el(w,'home').hidden);w.close()});
 test('hash changes before its event prevent a failed native share from copying stale text',async()=>{const w=boot();w.eval("start('easy',5)");finish(w);let reject,copies=0;w.navigator.share=()=>new Promise((resolve,rejecter)=>reject=rejecter);w.navigator.clipboard={writeText:async()=>copies++};const pending=w.eval('share()');w.location.hash='#challenge=NM1-H-00000003';reject(Error('failed'));await pending;a.equal(copies,0);a.equal(el(w,'shareStatus').textContent,'');w.close()});
+
+test('first-round guidance names the visible task and action in all ten locales without changing questions',()=>{
+ const w=boot('https://example.test/#challenge=NM1-N-00000001&scores=100.200.300.400.500&hints=1&replay=0');
+ const before=json(w,'({game,state,sharedResult})');
+ for(const locale of w.NamimaI18n.localeOrder){
+  language(w,locale);const I=w.NamimaI18n,guide=w.document.querySelector('.entry-guide');
+  a(guide);a(guide.textContent.includes(I.t('yours')));a(guide.textContent.includes(I.t('target')));a(guide.textContent.includes(I.t('judge')));
+  a(el(w,'challengeMeta').textContent.includes(I.t('sharedEntry')));a(el(w,'challengeMeta').textContent.includes('NM1-N-00000001'));
+  a(el(w,'judgment').hidden);a(!el(w,'challengeMeta').textContent.includes('150.0'));a.deepEqual(json(w,'({game,state,sharedResult})'),before);
+ }
+ click(w,'primary');a.equal(w.document.querySelector('.entry-guide'),null);
+ click(w,'reset');a(w.document.querySelector('.entry-guide'));
+ click(w,'primary');click(w,'primary');a.equal(w.document.querySelector('.entry-guide'),null);
+ a(el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));w.close();
+});
+test('orientation never invents a sender result for score-free links, fresh games or new rounds',()=>{
+ const w=boot('https://example.test/#challenge=NM1-E-00000001');
+ a(w.document.querySelector('.entry-guide'));a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));
+ finish(w);click(w,'replay');a.equal(w.document.querySelector('.entry-guide'),null);a(el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('replayNotice')));
+ finish(w);click(w,'again');a(w.document.querySelector('.entry-guide'));a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));
+ setHash(w,'#challenge=NM1-E-00000000&scores=0.0.0.0.0&hints=0&replay=0');a(el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));
+ setHash(w,'#challenge=NM1-H-00000003');a(!el(w,'challengeMeta').textContent.includes(w.NamimaI18n.t('sharedEntry')));w.close();
+});
